@@ -12,7 +12,7 @@ https://github.com/sergiopoverony/ps4chrono
 - SDK: ps4-payload-dev/sdk (john-tornblom), commit 573b4a0
 - SDK install: /tmp/sdk_new (see PAYLOAD_TOOLKIT.md section 3)
 
-## Current state: v0.2.0 (Phase 1)
+## Current state: v0.2.1 (Phase 1)
 - NTP sync working: queries up to 8 servers, stops at first success
 - Custom UDP DNS resolver (8.8.8.8, 1.1.1.1) + hardcoded fallback IPs
 - Last good time file: /data/ps4chrono/lastgood.dat
