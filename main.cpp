@@ -20,7 +20,7 @@
 #include "icon_data.h"
 
 // ── Version ──────────────────────────────────────────────
-#define APP_VERSION "0.1.9"
+#define APP_VERSION "0.2.0"
 #define APP_NAME    "ps4chrono"
 
 // Build timestamp as fallback minimum time (compiled into binary)
@@ -37,7 +37,7 @@
 #define LOCK_FILE    DATA_DIR "/lock"
 
 // ── Defaults ─────────────────────────────────────────────
-#define DEFAULT_CHECK_INTERVAL_SEC (5 * 60)   // 5 min for testing
+#define DEFAULT_CHECK_INTERVAL_SEC (6 * 3600)  // 6 hours
 #define NTP_PORT           123
 #define NTP_PACKET_SIZE    48
 #define NTP_TIMEOUT_SEC    2
