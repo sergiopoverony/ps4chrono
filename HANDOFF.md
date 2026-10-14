@@ -12,7 +12,7 @@ https://github.com/sergiopoverony/ps4chrono
 - SDK: ps4-payload-dev/sdk (john-tornblom), commit 573b4a0
 - SDK install: /tmp/sdk_new (see PAYLOAD_TOOLKIT.md section 3)
 
-## Current state: v0.1.9 (Phase 1)
+## Current state: v0.2.0 (Phase 1)
 - NTP sync working: queries up to 8 servers, stops at first success
 - Custom UDP DNS resolver (8.8.8.8, 1.1.1.1) + hardcoded fallback IPs
 - Last good time file: /data/ps4chrono/lastgood.dat
@@ -25,7 +25,7 @@ https://github.com/sergiopoverony/ps4chrono
 - Non-blocking web: sync shows "please wait" page instead of 302 redirect
 - Single instance via flock + quit flag
 - Stop via /quit endpoint
-- Default check interval: 5 min (for testing, user will change later)
+- Default check interval: 6 hours
 - Default NTP servers: pool.ntp.org, time.google.com, time.cloudflare.com, time.windows.com
 - Build date used as minimum valid time threshold (not hardcoded year)
 

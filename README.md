@@ -7,7 +7,7 @@ NTP time synchronization payload for PS4 (GoldHEN).
 - Multiple NTP servers (default: pool.ntp.org, time.google.com, time.cloudflare.com, time.windows.com)
 - Add/remove custom NTP servers via web interface (user servers get highest priority)
 - Duplicate server protection
-- Configurable check interval (5 min / 1h / 3h / 6h / 12h / 24h)
+- Configurable check interval (1h / 3h / 6h / 12h / 24h, default 6h)
 - "Last known good time" file as fallback when NTP is unreachable
 - Manual time setting via web interface
 - Custom notification icon
@@ -62,7 +62,7 @@ make
 ```
 
 ## Version
-0.1.9
+0.2.0
 
 ## License
 GPLv3

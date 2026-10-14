@@ -682,11 +682,11 @@ static int build_status_page(char* buf, size_t len) {
     }
 
     // Interval options
-    const int intervals[] = {300, 3600, 10800, 21600, 43200, 86400};
-    const char* labels[] = {"5 min", "1 hour", "3 hours", "6 hours", "12 hours", "24 hours"};
+    const int intervals[] = {3600, 10800, 21600, 43200, 86400};
+    const char* labels[] = {"1 hour", "3 hours", "6 hours", "12 hours", "24 hours"};
     char interval_opts[512] = "";
     int ipos = 0;
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 5; i++) {
         ipos += snprintf(interval_opts + ipos, sizeof(interval_opts) - ipos,
             "<option value='%d'%s>%s</option>",
             intervals[i],
