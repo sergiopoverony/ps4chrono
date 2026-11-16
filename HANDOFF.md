@@ -15,12 +15,17 @@ https://github.com/sergiopoverony/ps4chrono
 - Web page look reference: https://github.com/sergiopoverony/ps4hddtools (web/index.html)
 
 ## Current state: v0.2.4
-- v0.2.4: `make` builds ps4chrono.elf AND ps4chrono.bin (raw payload for .bin loaders), `make send-bin`
+- Tester results on console (testers COPY the file to the console and start it from GoldHEN menu, no ports):
+  .elf works on firmware below 14.02 (GoldHEN v2.4b18.13 / .14 tested); on 14.02 the .elf does not start
+  (no page, no log: it never gets to our code; the SDK has no explicit support for that firmware — not touched,
+  the assistant did not patch the SDK). .bin: GoldHEN menu says "Failed to launch payload, invalid payload".
+- v0.2.4: `make bin` builds ps4chrono.bin (EXPERIMENTAL, rejected by GoldHEN menu), `make send-bin`.
+  Plain `make` builds only the .elf (so the main build never depends on python3 or the .bin step).
   tools/mkbin.py: flat memory image of the ELF (.bss as zeros) at 0x4000, starter at byte 0 that applies
   R_X86_64_RELATIVE relocs (table at 0x40) and jumps to _start. Needed because SDK crt reads __image_start
   and __bss_end from GOT before its own rtld runs — a plain objcopy -O binary would crash.
   GLOB_DAT/JMP_SLOT (system functions) are still resolved by SDK crt (crt/rtld.c), as with the .elf.
-  Tested on PC: starter executed at a random address, all 20 relocs correct. NOT tested on PS4 yet.
+  Tested on PC: starter executed at a random address, all 20 relocs correct. On console: rejected, see above.
 - v0.2.3: web page restyled like ps4hddtools (same palette: #14161a bg, #1b1e24/#22262d panels,
   black header, green/red buttons), panels in a responsive grid
 - v0.2.3: manual time = separate cells hh : mm  dd . mo . yy (UTC, seconds 0, pre-filled with current UTC),
@@ -90,7 +95,7 @@ https://github.com/sergiopoverony/ps4chrono
 - main.cpp — single-file implementation
 - icon_data.h — notification icon PNG as C array (generated from icon.png)
 - icon.png — source notification icon (64x64 PNG)
-- Makefile — standard PS4 payload build (.elf + .bin)
+- Makefile — standard PS4 payload build (.elf; `make bin` adds experimental .bin)
 - tools/mkbin.py — .elf -> .bin converter
 - Data dir on PS4: /data/ps4chrono/
 
@@ -101,9 +106,10 @@ https://github.com/sergiopoverony/ps4chrono
 - User tests on console, sends back log
 - Increment APP_VERSION on every rebuild
 - Do not build until user gives command
-- Since v0.2.3 the user builds the ELF himself on WSL from the GitHub repo:
-  then deliver = commit + push + commands, no ELF from the assistant
-- Deliver elf + src zip + README.md + HANDOFF.md ALL TOGETHER, never piecemeal
+- The user builds the ELF himself on WSL from the GitHub repo. The assistant does NOT build and does NOT
+  send ELF/zip. Deliver = sources + README + HANDOFF pushed to GitHub, all consistent, plus WSL commands.
+  Check sources with the HOST_TEST build only. (Old rule, when the assistant built: elf + zip + README +
+  HANDOFF all together, never piecemeal.)
 - Do not add features the user didn't ask for; don't start work while user is only discussing
 - Git author: "Claude <noreply@anthropic.com>", no session links in commits/PRs
 - Push to GitHub only when the user says so
