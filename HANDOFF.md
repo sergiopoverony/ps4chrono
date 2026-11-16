@@ -16,9 +16,14 @@ https://github.com/sergiopoverony/ps4chrono
 
 ## Current state: v0.2.4
 - Tester results on console (testers COPY the file to the console and start it from GoldHEN menu, no ports):
-  .elf works on firmware below 14.02 (GoldHEN v2.4b18.13 / .14 tested); on 14.02 the .elf does not start
-  (no page, no log: it never gets to our code; the SDK has no explicit support for that firmware — not touched,
-  the assistant did not patch the SDK). .bin: GoldHEN menu says "Failed to launch payload, invalid payload".
+  .elf built with the stock SDK works on firmware below 14.02 (GoldHEN v2.4b18.13 / .14 tested); on 14.02 it
+  does not start (no page, no log: the SDK has no offsets for that firmware). Fixed by tools/sdk-14.02.patch
+  (SDK crt/kernel.c, `case 0x14020000`: COPYOUT 0x2BDC50, COPYIN 0x2BDD40, TARGETID 0x21CC60D). The offsets were
+  derived from ps4debug-NG (memcpy 0x2BDB50) and CONFIRMED WORKING on a real 14.02 console (user's tester).
+  Build with the patched SDK (README, "Firmware 14.02"); source code of ps4chrono is unchanged (still v0.2.4).
+  The Scene-Collective SDK (libPS4) already has 14.02 upstream (K1402_COPYOUT 0x002BDC50, same value) but ps4chrono
+  does not use it: its Makefile uses the john-tornblom SDK (toolchain/orbis.mk).
+  .bin: GoldHEN menu says "Failed to launch payload, invalid payload".
 - v0.2.4: `make bin` builds ps4chrono.bin (EXPERIMENTAL, rejected by GoldHEN menu), `make send-bin`.
   Plain `make` builds only the .elf (so the main build never depends on python3 or the .bin step).
   tools/mkbin.py: flat memory image of the ELF (.bss as zeros) at 0x4000, starter at byte 0 that applies

@@ -83,6 +83,21 @@ make
 Builds `ps4chrono.elf`. Works on Linux and WSL (Ubuntu).
 `make send` sends it to `PS4_HOST` (default 192.168.0.24) port 9090.
 
+### Firmware 14.02
+The SDK commit 573b4a0 has no offsets for firmware 14.02, so an ELF built with it does not start there.
+`tools/sdk-14.02.patch` adds them to the SDK's `crt/kernel.c` (`case 0x14020000`: COPYOUT +0x2BDC50,
+COPYIN +0x2BDD40, TARGETID +0x21CC60D). Confirmed working on a real 14.02 console.
+Apply it to the SDK sources, install the SDK into its own folder and build with it:
+```
+git clone https://github.com/ps4-payload-dev/sdk && cd sdk && git checkout 573b4a0
+git apply /path/to/ps4chrono/tools/sdk-14.02.patch
+mkdir -p ~/sdk1402
+make DESTDIR=$HOME/sdk1402 clean install
+TMPDIR=$HOME/tmpbuild PS4_PAYLOAD_SDK=$HOME/sdk1402 ./libcxx.sh   # mkdir -p ~/tmpbuild first
+cd /path/to/ps4chrono && PS4_PAYLOAD_SDK=$HOME/sdk1402 make clean all
+```
+`TMPDIR` is needed when `/tmp` is a small tmpfs (as on some WSL setups): `libcxx.sh` unpacks LLVM there.
+
 Experimental: `make bin` also builds `ps4chrono.bin` (needs `python3`, see `tools/mkbin.py`): the ELF's
 memory image laid out flat behind a small starter at byte 0 that fixes the payload's internal addresses.
 It is not confirmed to work on a console (GoldHEN payload menu rejected it).
