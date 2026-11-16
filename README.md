@@ -98,6 +98,15 @@ cd /path/to/ps4chrono && PS4_PAYLOAD_SDK=$HOME/sdk1402 make clean all
 ```
 `TMPDIR` is needed when `/tmp` is a small tmpfs (as on some WSL setups): `libcxx.sh` unpacks LLVM there.
 
+Reminder, after any change to the SDK sources (`crt/kernel.c`):
+1. Reinstall the SDK: `make DESTDIR=$HOME/sdk1402 install` (run in the SDK sources; `libcxx.sh` does not need to be run again).
+2. Rebuild ps4chrono: `PS4_PAYLOAD_SDK=$HOME/sdk1402 make clean all`. The SDK's `crt` is linked into the ELF,
+   so an ELF built earlier does not get the change, and the installed SDK does not get it until step 1.
+
+Optional, not part of the 14.02 patch and not confirmed on a console: the same SDK sources have `TARGETID`
+`0x021CC60D` for firmware 11.00 and 11.02, a fix to `0x0221C60D` was seen in a diff. It affects only those two
+firmwares (not 13.x / 14.x), so ps4chrono does not need it unless it is run there.
+
 Experimental: `make bin` also builds `ps4chrono.bin` (needs `python3`, see `tools/mkbin.py`): the ELF's
 memory image laid out flat behind a small starter at byte 0 that fixes the payload's internal addresses.
 It is not confirmed to work on a console (GoldHEN payload menu rejected it).
