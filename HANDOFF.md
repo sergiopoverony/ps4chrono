@@ -14,7 +14,13 @@ https://github.com/sergiopoverony/ps4chrono
 - Reference project for proven PS4 techniques: https://github.com/sergiopoverony/ps4torrent
 - Web page look reference: https://github.com/sergiopoverony/ps4hddtools (web/index.html)
 
-## Current state: v0.2.3
+## Current state: v0.2.4
+- v0.2.4: `make` builds ps4chrono.elf AND ps4chrono.bin (raw payload for .bin loaders), `make send-bin`
+  tools/mkbin.py: flat memory image of the ELF (.bss as zeros) at 0x4000, starter at byte 0 that applies
+  R_X86_64_RELATIVE relocs (table at 0x40) and jumps to _start. Needed because SDK crt reads __image_start
+  and __bss_end from GOT before its own rtld runs — a plain objcopy -O binary would crash.
+  GLOB_DAT/JMP_SLOT (system functions) are still resolved by SDK crt (crt/rtld.c), as with the .elf.
+  Tested on PC: starter executed at a random address, all 20 relocs correct. NOT tested on PS4 yet.
 - v0.2.3: web page restyled like ps4hddtools (same palette: #14161a bg, #1b1e24/#22262d panels,
   black header, green/red buttons), panels in a responsive grid
 - v0.2.3: manual time = separate cells hh : mm  dd . mo . yy (UTC, seconds 0, pre-filled with current UTC),
@@ -84,7 +90,8 @@ https://github.com/sergiopoverony/ps4chrono
 - main.cpp — single-file implementation
 - icon_data.h — notification icon PNG as C array (generated from icon.png)
 - icon.png — source notification icon (64x64 PNG)
-- Makefile — standard PS4 payload build
+- Makefile — standard PS4 payload build (.elf + .bin)
+- tools/mkbin.py — .elf -> .bin converter
 - Data dir on PS4: /data/ps4chrono/
 
 ## User rules

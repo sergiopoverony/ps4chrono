@@ -18,10 +18,11 @@ NTP time synchronization payload for PS4 (GoldHEN).
 
 ## Usage
 1. Disable the built-in GoldHEN time sync
-2. Send `ps4chrono.elf` to your PS4 via BinLoader (port 9090):
+2. Send `ps4chrono.elf` (or `ps4chrono.bin`) to your PS4 via BinLoader (port 9090):
    ```
    orbis-deploy -h <PS4_IP> -p 9090 ps4chrono.elf
    ```
+   `ps4chrono.bin` is the same payload for loaders and menus that take raw `.bin` files.
 3. Open web interface: `http://<PS4_IP>:8585`
 4. For autostart, add to GoldHEN autoload
 
@@ -77,7 +78,12 @@ Requires [ps4-payload-dev/sdk](https://github.com/ps4-payload-dev/sdk) (with lib
 export PS4_PAYLOAD_SDK=/path/to/sdk
 make
 ```
-Works on Linux and WSL (Ubuntu).
+Builds `ps4chrono.elf` and `ps4chrono.bin` (needs `python3`). Works on Linux and WSL (Ubuntu).
+`make send` / `make send-bin` sends the file to `PS4_HOST` (default 192.168.0.24) port 9090.
+
+How the `.bin` is made (`tools/mkbin.py`): the ELF's memory image is laid out flat (with `.bss` as zeros),
+behind a small starter at byte 0. The starter fixes the payload's internal addresses (what an ELF loader
+would do), then jumps to `_start`; the SDK startup code does the rest, same as with the `.elf`.
 
 PC test build (no PS4 needed, data in `/tmp/ps4chrono_test`, clock is not changed):
 ```
@@ -85,7 +91,7 @@ g++ -std=c++17 -DHOST_TEST -o chrono_host main.cpp -lpthread
 ```
 
 ## Version
-0.2.3
+0.2.4
 
 ## License
 GPLv3

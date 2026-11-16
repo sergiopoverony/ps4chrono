@@ -25,7 +25,7 @@
 #include "icon_data.h"
 
 // ── Version ──────────────────────────────────────────────
-#define APP_VERSION "0.2.3"
+#define APP_VERSION "0.2.4"
 #define APP_NAME    "ps4chrono"
 
 // Build timestamp as fallback minimum time (compiled into binary)

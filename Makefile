@@ -8,16 +8,27 @@ else
 endif
 
 ELF     ?= ps4chrono.elf
+BIN     ?= ps4chrono.bin
 SRCS    := main.cpp
 CXXFLAGS := -std=c++17 -O2 -Wall
 
-all: $(ELF)
+# make: builds both ps4chrono.elf and ps4chrono.bin
+all: $(ELF) $(BIN)
 
 $(ELF): $(SRCS) $(wildcard *.h)
 	$(CXX) $(CXXFLAGS) -o $@ $(SRCS)
 
+# .bin = same payload for loaders that take raw .bin files (see tools/mkbin.py)
+$(BIN): $(ELF) tools/mkbin.py
+	python3 tools/mkbin.py $(ELF) $@
+
 clean:
-	rm -f $(ELF)
+	rm -f $(ELF) $(BIN)
 
 send: $(ELF)
 	$(PS4_DEPLOY) -h $(PS4_HOST) -p $(PS4_PORT) $^
+
+send-bin: $(BIN)
+	$(PS4_DEPLOY) -h $(PS4_HOST) -p $(PS4_PORT) $^
+
+.PHONY: all clean send send-bin
