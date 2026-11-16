@@ -10,7 +10,7 @@ NTP time synchronization payload for PS4 (GoldHEN).
 - Configurable check interval (1h / 3h / 6h / 12h / 24h, default 6h)
 - If the clock is wrong and can't be confirmed by NTP, retries every 30 seconds until NTP answers
 - "Last known good time" file as fallback when NTP is unreachable
-- Manual time setting via web interface
+- Manual time setting via web interface (separate cells, like PS4 settings)
 - Settings file created on first start, can be edited by hand
 - On-screen notifications with custom icon
 - Single instance: sending the ELF again replaces the running copy
@@ -66,17 +66,18 @@ After editing, press **Restart** on the web page (or send the ELF again).
 - View current system time and last good time
 - Add/remove NTP servers
 - Change check interval
-- Set time manually (UTC format: YYYY-MM-DD HH:MM:SS)
+- Set time manually: separate cells Hour : Min  Day . Month . Year (UTC, pre-filled with current time)
 - Sync now
 - Restart — re-read `config.dat` and sync
 - Stop the service (`/quit`)
 
 ## Building
-Requires [ps4-payload-dev/sdk](https://github.com/john-tornblom/ps4-payload-SDK):
+Requires [ps4-payload-dev/sdk](https://github.com/ps4-payload-dev/sdk) (with libc++ built by its `libcxx.sh`):
 ```
 export PS4_PAYLOAD_SDK=/path/to/sdk
 make
 ```
+Works on Linux and WSL (Ubuntu).
 
 PC test build (no PS4 needed, data in `/tmp/ps4chrono_test`, clock is not changed):
 ```
@@ -84,7 +85,7 @@ g++ -std=c++17 -DHOST_TEST -o chrono_host main.cpp -lpthread
 ```
 
 ## Version
-0.2.2
+0.2.3
 
 ## License
 GPLv3

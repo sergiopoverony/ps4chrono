@@ -12,8 +12,14 @@ https://github.com/sergiopoverony/ps4chrono
 - SDK: ps4-payload-dev/sdk (john-tornblom), commit 573b4a0
 - SDK install: /tmp/sdk_new (see PAYLOAD_TOOLKIT.md section 3)
 - Reference project for proven PS4 techniques: https://github.com/sergiopoverony/ps4torrent
+- Web page look reference: https://github.com/sergiopoverony/ps4hddtools (web/index.html)
 
-## Current state: v0.2.2
+## Current state: v0.2.3
+- v0.2.3: web page restyled like ps4hddtools (same palette: #14161a bg, #1b1e24/#22262d panels,
+  black header, green/red buttons), panels in a responsive grid
+- v0.2.3: manual time = separate cells hh : mm  dd . mo . yy (UTC, seconds 0, pre-filled with current UTC),
+  invalid dates (31.02, hour 25, before build date) rejected with a message page
+- v0.2.3: get_param matches only whole names after '?' or '&' (so "mm" can't match inside another key)
 - NTP sync: queries up to 8 servers, stops at first success
 - Custom UDP DNS resolver (8.8.8.8, 1.1.1.1) + hardcoded fallback IPs
 - Last good time file: /data/ps4chrono/lastgood.dat
@@ -49,6 +55,9 @@ https://github.com/sergiopoverony/ps4chrono
 - v0.2.2 tested on PC: config auto-create, name cleanup, Restart with hand-edited config,
   30 s retry with once-only notifications, takeover of running copy, /quit, 30 parallel requests during sync
 - Not tested on PS4 yet: rest mode recovery, takeover of v0.2.1 copies
+- v0.2.3 tested on PC: all date cell cases, add/interval/delete, page screenshots desktop + phone
+- Memory check (v0.2.2, offline, every check failing): RSS flat 2120 kB, fds flat, valgrind 0 bytes lost.
+  Only the log file grows offline (~1 KB per failed check, ~3 MB/day) — log cap offered, user hasn't decided
 
 ## Tester log findings (v0.1.x–v0.2.0)
 - Multiple copies alive at once (fixed in v0.2.2)
@@ -85,6 +94,8 @@ https://github.com/sergiopoverony/ps4chrono
 - User tests on console, sends back log
 - Increment APP_VERSION on every rebuild
 - Do not build until user gives command
+- Since v0.2.3 the user builds the ELF himself on WSL from the GitHub repo:
+  then deliver = commit + push + commands, no ELF from the assistant
 - Deliver elf + src zip + README.md + HANDOFF.md ALL TOGETHER, never piecemeal
 - Do not add features the user didn't ask for; don't start work while user is only discussing
 - Git author: "Claude <noreply@anthropic.com>", no session links in commits/PRs

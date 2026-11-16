@@ -25,7 +25,7 @@
 #include "icon_data.h"
 
 // ── Version ──────────────────────────────────────────────
-#define APP_VERSION "0.2.2"
+#define APP_VERSION "0.2.3"
 #define APP_NAME    "ps4chrono"
 
 // Build timestamp as fallback minimum time (compiled into binary)
@@ -818,6 +818,47 @@ static void format_time_str(time_t t, char* buf, size_t len) {
     strftime(buf, len, "%Y-%m-%d %H:%M:%S UTC", &tm);
 }
 
+// Same look as ps4hddtools web page
+#define PAGE_CSS \
+    ":root{--bg:#14161a;--panel:#1b1e24;--panel2:#22262d;--line:#2d323b;--text:#e6e9ef;" \
+    "--muted:#8b93a1;--accent:#5b9dff;--good:#3fbf72;--bad:#e5484d}" \
+    "*{box-sizing:border-box}html,body{margin:0}" \
+    "body{background:var(--bg);color:var(--text);" \
+    "font:14px/1.4 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;" \
+    "min-height:100vh;display:flex;flex-direction:column}" \
+    "header{background:#000;border-bottom:1px solid var(--line);padding:14px 16px}" \
+    "header h1{margin:0;font-size:20px;font-weight:600}" \
+    "header h1 small{color:var(--muted);font-size:13px;font-weight:400;margin-left:6px}" \
+    "main{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));" \
+    "gap:12px;padding:12px;align-items:start;align-content:start}" \
+    ".panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;min-width:0}" \
+    "h2{margin:0 0 10px;font-size:17px;font-weight:600}" \
+    ".muted{color:var(--muted)}" \
+    ".kv{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:5px 9px;" \
+    "display:flex;justify-content:space-between;gap:8px;margin-bottom:6px}" \
+    ".kv span:first-child{color:var(--muted);white-space:nowrap}" \
+    ".kv span:last-child{text-align:right;overflow-wrap:anywhere}" \
+    "table{border-collapse:collapse;width:100%%;margin-bottom:10px}" \
+    "td{padding:6px 8px;border-bottom:1px solid var(--line)}" \
+    "td:first-child{color:var(--muted);width:28px}td:last-child{text-align:right}" \
+    "input,select{background:var(--panel2);color:var(--text);border:1px solid var(--line);" \
+    "border-radius:6px;padding:7px 9px;font:inherit}" \
+    ".row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}" \
+    ".row input[type=text]{flex:1;min-width:160px}" \
+    ".btn{display:inline-block;background:var(--panel2);color:var(--text);border:1px solid var(--line);" \
+    "border-radius:8px;padding:7px 14px;font:inherit;cursor:pointer;text-decoration:none}" \
+    ".btn:hover{background:#2c313a}" \
+    ".btn.green{background:#1f7a47;border-color:#2d9d5f;color:#fff}.btn.green:hover{background:#27905a}" \
+    ".btn.danger{background:#7d252b;border-color:#a3323a;color:#fff}" \
+    "a.rm{color:var(--bad);text-decoration:none}" \
+    ".dt{display:flex;align-items:flex-end;gap:10px 22px;flex-wrap:wrap;margin-bottom:12px}" \
+    ".dt .g{display:flex;align-items:flex-end;gap:5px}" \
+    ".dt label{display:block;font-size:11px;color:var(--muted);text-align:center}" \
+    ".dt input{width:50px;text-align:center;font-size:20px;padding:8px 2px}" \
+    ".dt input.y{width:76px}.dt b{font-size:20px;padding-bottom:9px;color:var(--muted)}" \
+    "footer{padding:10px 14px;text-align:center;color:var(--muted);font-size:12px;" \
+    "border-top:1px solid var(--line)}"
+
 // Build status page HTML
 static int build_status_page(char* buf, size_t len) {
     time_t now = time(nullptr);
@@ -825,6 +866,10 @@ static int build_status_page(char* buf, size_t len) {
     char now_str[64], lg_str[64];
     format_time_str(now, now_str, sizeof(now_str));
     format_time_str(last_good, lg_str, sizeof(lg_str));
+
+    // current UTC time pre-filled into the date cells
+    struct tm cur;
+    gmtime_r(&now, &cur);
 
     char servers_html[2048] = "";
     char interval_opts[640] = "";
@@ -836,7 +881,7 @@ static int build_status_page(char* buf, size_t len) {
     for (int i = 0; i < g_servers.count; i++) {
         pos += snprintf(servers_html + pos, sizeof(servers_html) - pos,
             "<tr><td>%d</td><td>%s</td>"
-            "<td><a href='/delete?idx=%d' style='color:#e74c3c'>remove</a></td></tr>",
+            "<td><a class='rm' href='/delete?idx=%d'>remove</a></td></tr>",
             i + 1, g_servers.servers[i], i);
         if (pos >= (int)sizeof(servers_html)) break;
     }
@@ -866,47 +911,55 @@ static int build_status_page(char* buf, size_t len) {
         "Cache-Control: no-store\r\n\r\n"
         "<!DOCTYPE html><html><head><title>ps4chrono</title>"
         "<meta name='viewport' content='width=device-width,initial-scale=1'>"
-        "<style>"
-        "body{font-family:sans-serif;background:#1a1a2e;color:#e0e0e0;margin:0;padding:20px}"
-        "h1{color:#0ff;font-size:1.5em}"
-        ".box{background:#16213e;border-radius:8px;padding:15px;margin:10px 0}"
-        "table{width:100%%;border-collapse:collapse}"
-        "td{padding:6px;border-bottom:1px solid #333}"
-        "input,select,button{background:#0d1b2a;color:#e0e0e0;border:1px solid #444;"
-        "padding:8px;border-radius:4px;margin:4px}"
-        "button{background:#0ff;color:#000;cursor:pointer;font-weight:bold}"
-        "a{color:#0ff}"
-        ".footer{margin-top:20px;font-size:0.8em;color:#666;text-align:center}"
-        "</style></head><body>"
-        "<h1>&#128336; ps4chrono v" APP_VERSION "</h1>"
-        "<div class='box'>"
-        "<b>System time:</b> %s%s<br>"
-        "<b>Last good time:</b> %s<br>"
-        "<b>Check interval:</b> %d sec<br>"
-        "<b>Config file:</b> " CONFIG_FILE
-        "</div>"
-        "<div class='box'><h3>NTP Servers</h3>"
+        "<style>" PAGE_CSS "</style></head><body>"
+        "<header><h1>&#128336; ps4chrono<small>v" APP_VERSION "</small></h1></header>"
+        "<main>"
+
+        "<div class='panel'><h2>Status</h2>"
+        "<div class='kv'><span>System time</span><span>%s%s</span></div>"
+        "<div class='kv'><span>Last good time</span><span>%s</span></div>"
+        "<div class='kv'><span>Check interval</span><span>%d sec</span></div>"
+        "<div class='kv'><span>Config file</span><span>" CONFIG_FILE "</span></div>"
+        "<div class='row' style='margin-top:10px'>"
+        "<a class='btn green' href='/sync'>&#9889; Sync now</a>"
+        "<a class='btn' href='/'>&#128260; Refresh</a>"
+        "<a class='btn' href='/restart'>&#8635; Restart</a>"
+        "<a class='btn danger' href='/quit'>&#9724; Stop</a>"
+        "</div></div>"
+
+        "<div class='panel'><h2>NTP servers</h2>"
         "<table>%s</table>"
-        "<form method='GET' action='/add'>"
-        "<input type='text' name='s' placeholder='server address' size='30'>"
-        "<button type='submit'>Add</button></form></div>"
-        "<div class='box'><h3>Check interval</h3>"
-        "<form method='GET' action='/interval'>"
-        "<select name='v'>%s</select>"
-        "<button type='submit'>Save</button></form></div>"
-        "<div class='box'><h3>Set time manually</h3>"
+        "<form method='GET' action='/add' class='row'>"
+        "<input type='text' name='s' placeholder='server address'>"
+        "<button class='btn green' type='submit'>Add</button></form></div>"
+
+        "<div class='panel'><h2>Set time manually <span class='muted'>(UTC)</span></h2>"
         "<form method='GET' action='/settime'>"
-        "<input type='text' name='t' placeholder='YYYY-MM-DD HH:MM:SS' size='20'>"
-        " (UTC)<button type='submit'>Set</button></form></div>"
-        "<div class='box'>"
-        "<a href='/sync'>&#9889; Sync now</a> &nbsp; "
-        "<a href='/'>&#128260; Refresh</a> &nbsp; "
-        "<a href='/restart'>&#8635; Restart</a> &nbsp; "
-        "<a href='/quit' style='color:#f44'>&#9724; Stop</a></div>"
-        "<div class='footer'>Created by SergioPoverony and Mr.Claude</div>"
+        "<div class='dt'><div class='g'>"
+        "<div><label>Hour</label><input type='text' inputmode='numeric' maxlength='2' name='hh' value='%02d'></div>"
+        "<b>:</b>"
+        "<div><label>Min</label><input type='text' inputmode='numeric' maxlength='2' name='mm' value='%02d'></div>"
+        "</div><div class='g'>"
+        "<div><label>Day</label><input type='text' inputmode='numeric' maxlength='2' name='dd' value='%02d'></div>"
+        "<b>.</b>"
+        "<div><label>Month</label><input type='text' inputmode='numeric' maxlength='2' name='mo' value='%02d'></div>"
+        "<b>.</b>"
+        "<div><label>Year</label><input class='y' type='text' inputmode='numeric' maxlength='4' name='yy' value='%04d'></div>"
+        "</div></div>"
+        "<button class='btn green' type='submit'>Set</button></form></div>"
+
+        "<div class='panel'><h2>Check interval</h2>"
+        "<form method='GET' action='/interval' class='row'>"
+        "<select name='v'>%s</select>"
+        "<button class='btn green' type='submit'>Save</button></form></div>"
+
+        "</main>"
+        "<footer>Created by SergioPoverony and Mr.Claude</footer>"
         "</body></html>",
-        now_str, g_syncing.load() ? " &nbsp;<i>(syncing...)</i>" : "",
-        lg_str, interval, servers_html, interval_opts);
+        now_str, g_syncing.load() ? " <i class='muted'>(syncing...)</i>" : "",
+        lg_str, interval, servers_html,
+        cur.tm_hour, cur.tm_min, cur.tm_mday, cur.tm_mon + 1, cur.tm_year + 1900,
+        interval_opts);
 }
 
 static void build_message_page(char* buf, size_t len, const char* msg, int refresh_sec) {
@@ -918,8 +971,11 @@ static void build_message_page(char* buf, size_t len, const char* msg, int refre
         "HTTP/1.0 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n"
         "Cache-Control: no-store\r\n\r\n"
         "<!DOCTYPE html><html><head><title>ps4chrono</title>%s"
-        "<style>body{font-family:sans-serif;background:#1a1a2e;color:#e0e0e0;"
+        "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+        "<style>body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;"
+        "background:#14161a;color:#e6e9ef;"
         "display:flex;justify-content:center;align-items:center;height:100vh;margin:0}"
+        "h2{font-weight:600;text-align:center;padding:0 16px}"
         "</style></head><body><h2>%s</h2></body></html>",
         refresh, msg);
 }
@@ -945,7 +1001,16 @@ static void url_decode(const char* src, char* dst, size_t len) {
 static bool get_param(const char* url, const char* key, char* val, size_t vlen) {
     char search[64];
     snprintf(search, sizeof(search), "%s=", key);
-    const char* p = strstr(url, search);
+    // only a whole name after '?' or '&' ("m=" must not match inside "mm=")
+    const char* q = strchr(url, '?');
+    if (!q) return false;
+    const char* end = strpbrk(q, " \r\n");   // query ends at " HTTP/1.x"
+    const char* p = q;
+    while ((p = strstr(p, search)) != nullptr) {
+        if (end && p > end) return false;
+        if (p[-1] == '?' || p[-1] == '&') break;
+        p++;
+    }
     if (!p) return false;
     p += strlen(search);
     size_t i = 0;
@@ -982,7 +1047,7 @@ static void handle_web_request(int client) {
     if (n == 0) return;
     req[n] = '\0';
 
-    static char response[8192];   // only used under resp_mx
+    static char response[16384];   // only used under resp_mx
     static pthread_mutex_t resp_mx = PTHREAD_MUTEX_INITIALIZER;
 
     // Notification icon (PS4 loads it from us by HTTP)
@@ -1049,25 +1114,49 @@ static void handle_web_request(int client) {
         }
         send_all(client, redirect, strlen(redirect));
     } else if (path_is(req, "/settime")) {
-        char tstr[32];
-        if (get_param(req, "t", tstr, sizeof(tstr))) {
-            struct tm tm;
-            memset(&tm, 0, sizeof(tm));
-            if (sscanf(tstr, "%d-%d-%d %d:%d:%d",
-                       &tm.tm_year, &tm.tm_mon, &tm.tm_mday,
-                       &tm.tm_hour, &tm.tm_min, &tm.tm_sec) >= 3) {
-                tm.tm_year -= 1900;
-                tm.tm_mon -= 1;
+        // cells: hh mm (time)  dd mo yy (date), UTC, seconds = 0
+        char v[5][8] = {};
+        const char* keys[5] = {"hh", "mm", "dd", "mo", "yy"};
+        bool all = true;
+        for (int i = 0; i < 5; i++)
+            if (!get_param(req, keys[i], v[i], sizeof(v[i])) || !v[i][0]) all = false;
+
+        bool ok = false;
+        if (all) {
+            int hh = atoi(v[0]), mi = atoi(v[1]), dd = atoi(v[2]), mo = atoi(v[3]), yy = atoi(v[4]);
+            if (hh >= 0 && hh <= 23 && mi >= 0 && mi <= 59 &&
+                dd >= 1 && dd <= 31 && mo >= 1 && mo <= 12 && yy >= 1970 && yy <= 2100) {
+                struct tm tm;
+                memset(&tm, 0, sizeof(tm));
+                tm.tm_year = yy - 1900;
+                tm.tm_mon = mo - 1;
+                tm.tm_mday = dd;
+                tm.tm_hour = hh;
+                tm.tm_min = mi;
                 time_t t = timegm(&tm);
-                if (t > get_build_time()) {
+                // 31.02 would roll over to March: check the date came back the same
+                struct tm back;
+                gmtime_r(&t, &back);
+                if (back.tm_mday == dd && back.tm_mon == mo - 1 && t > get_build_time()) {
                     set_system_time(t);
                     save_last_good_time(t);
                     notify("ps4chrono: set manually");
                     log_msg("Manual time set: %ld", (long)t);
+                    ok = true;
                 }
             }
         }
-        send_all(client, redirect, strlen(redirect));
+        if (ok) {
+            send_all(client, redirect, strlen(redirect));
+        } else {
+            log_msg("Manual time rejected: %s:%s %s.%s.%s",
+                    v[0], v[1], v[2], v[3], v[4]);
+            pthread_mutex_lock(&resp_mx);
+            build_message_page(response, sizeof(response),
+                               "Wrong date or time (must be after build date)", 3);
+            send_all(client, response, strlen(response));
+            pthread_mutex_unlock(&resp_mx);
+        }
     } else if (path_is(req, "/sync")) {
         g_sync_req = true;
         pthread_mutex_lock(&resp_mx);
